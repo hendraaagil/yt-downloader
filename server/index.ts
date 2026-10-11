@@ -53,6 +53,23 @@ export async function start(port: number, dl: Downloader = download) {
         });
       }
 
+      // one-shot: download a single link and stream the file back. No queue/SSE/state.
+      if (pathname === "/api/download" && m === "POST") {
+        const b: any = await req.json().catch(() => null);
+        if (
+          !b || typeof b.url !== "string" || !b.url.trim() ||
+          (b.format !== "mp3" && b.format !== "mp4")
+        ) return json({ error: "need url and format mp3|mp4" }, 400);
+        let res;
+        try { res = await dl({ url: b.url.trim(), format: b.format }, () => {}); }
+        catch (e) { return json({ error: String((e as Error)?.message ?? e) }, 502); }
+        const f = Bun.file(resolve(DIR, res.file.split(/[\\/]/).pop()!));
+        if (!(await f.exists())) return json({ error: "file missing after download" }, 500);
+        return new Response(f, {
+          headers: { "content-disposition": `attachment; filename*=UTF-8''${encodeURIComponent(res.file.split(/[\\/]/).pop()!)}` },
+        });
+      }
+
       if (pathname.startsWith("/api/downloads/") && m === "GET") {
         let rel: string;
         try { rel = decodeURIComponent(pathname.slice(15)); } catch { return new Response("bad path", { status: 400 }); }

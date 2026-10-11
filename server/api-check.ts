@@ -52,6 +52,12 @@ assert.equal((await fetch(`${base}/api/downloads/..%2Fsecret.txt`)).status, 403)
 assert.equal((await fetch(`${base}/api/jobs/${created[0].id}`, { method: "DELETE" })).status, 204);
 assert.equal(((await (await fetch(`${base}/api/jobs`)).json()) as any[]).length, 1);
 
+// one-shot /api/download: bad body -> 400, good -> 200 streaming the file back
+assert.equal((await fetch(`${base}/api/download`, { method: "POST", body: JSON.stringify({ url: "" }) })).status, 400);
+const dl = await fetch(`${base}/api/download`, { method: "POST", body: JSON.stringify({ url: "https://a", format: "mp3" }) });
+assert.equal(dl.status, 200);
+assert.equal(await dl.text(), "hello");
+
 server.stop(true);
 await Bun.sleep(100);
 await rm(tmp, { recursive: true, force: true });
