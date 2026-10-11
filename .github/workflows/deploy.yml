@@ -1,0 +1,57 @@
+name: Build & Deploy
+
+on:
+  workflow_dispatch: # Trigger the workflow manually
+  push:
+    branches:
+      - main # Trigger the workflow on push to the main branch
+
+jobs:
+  build_and_deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+
+    env:
+      APP_NAME: yt-dl
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+
+      - name: Set up SSH agent for deployment
+        uses: webfactory/ssh-agent@v0.10.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_PRIVATE_KEY }}
+
+      - name: Ensure project directory exists on VPS
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ vars.VPS_USER }}@${{ vars.VPS_HOST }} << 'EOF'
+            mkdir -p ~/apps/${{ env.APP_NAME }}
+            cd ~/apps/${{ env.APP_NAME }}
+            if [ ! -d .git ]; then
+              git clone ${{ vars.REPO_URL }} .
+            fi
+          EOF
+
+      - name: Deploy to VPS
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ vars.VPS_USER }}@${{ vars.VPS_HOST }} << 'EOF'
+            # Navigate to project directory
+            cd ~/apps/${{ env.APP_NAME }}
+
+            # Pull repository
+            git pull origin main
+
+            # Stop existing containers
+            docker compose down || true
+
+            # Start containers with the locally built image
+            docker compose up --build -d
+          EOF
