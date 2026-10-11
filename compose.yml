@@ -1,5 +1,6 @@
 services:
   api:
+    container_name: yt-dl_api
     build: ./server
     ports: ["4003:4003"]
     volumes:
@@ -12,6 +13,7 @@ services:
       STATE_FILE: /data/state.json
     restart: unless-stopped
   web:
+    container_name: yt-dl_web
     build: ./web
     ports: ["3003:3003"]
     depends_on: [api]
