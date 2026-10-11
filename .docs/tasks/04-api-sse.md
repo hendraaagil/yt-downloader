@@ -7,7 +7,7 @@
 ## Goal
 
 Wire the queue to HTTP. REST routes + an SSE stream for live progress, all on
-`:4003` under `/api`.
+`:4004` under `/api`.
 
 ## Scope
 

@@ -2,12 +2,12 @@ services:
   api:
     container_name: yt-dl_api
     build: ./server
-    ports: ["4003:4003"]
+    ports: ["4004:4004"]
     volumes:
       - ./data:/data
       - ./downloads:/downloads
     environment:
-      PORT: "4003"
+      PORT: "4004"
       CONCURRENCY: "2"
       DOWNLOAD_DIR: /downloads
       STATE_FILE: /data/state.json

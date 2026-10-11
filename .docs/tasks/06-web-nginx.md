@@ -6,7 +6,7 @@
 
 ## Goal
 
-Package the frontend behind nginx on `:3003`, proxying `/api` to `api:4003`.
+Package the frontend behind nginx on `:3003`, proxying `/api` to `api:4004`.
 
 ## Scope
 
@@ -16,7 +16,7 @@ Package the frontend behind nginx on `:3003`, proxying `/api` to `api:4003`.
 - `web/nginx.conf`:
   - `listen 3003;`
   - `location /` → `try_files $uri /index.html;` (SPA fallback).
-  - `location /api/` → `proxy_pass http://api:4003;` with:
+  - `location /api/` → `proxy_pass http://api:4004;` with:
     - `proxy_http_version 1.1;` + `proxy_set_header Connection "";`
     - `proxy_buffering off;` (**required** for SSE or progress stalls)
     - `proxy_read_timeout 1h;` (long downloads)

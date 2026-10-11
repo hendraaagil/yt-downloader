@@ -5,7 +5,7 @@ app downloads them one by one (small concurrency). Runs on an Ubuntu box in the
 local network via one `docker compose up`. No database.
 
 **Access: `http://<server-LAN-IP>:3003`** — web UI port. Backend API runs on
-`4003` (same host, used internally; optionally reachable directly for debugging).
+`4004` (same host, used internally; optionally reachable directly for debugging).
 
 ---
 
@@ -34,7 +34,7 @@ local network via one `docker compose up`. No database.
 | Downloader | **yt-dlp** CLI + **ffmpeg** | yt-dlp does the work; ffmpeg does MP3 extraction / MP4 merge. |
 | Frontend | **React + Tailwind** (Vite)   | As requested. Served by nginx; proxies `/api` to backend. |
 | State    | **One JSON file** on disk     | No DB. Queue + job history live in `data/state.json`. |
-| Deploy   | **Single `compose.yml`** | Two services (web `:3003`, api `:4003`), two volumes. |
+| Deploy   | **Single `compose.yml`** | Two services (web `:3003`, api `:4004`), two volumes. |
 
 > Node + TS is a drop-in alternative (swap `bun` for `node`, add Express or use
 > `node:http`). Bun chosen for the smaller footprint and built-in bundler.
@@ -50,10 +50,10 @@ local network via one `docker compose up`. No database.
 │        │  http://<server-ip>:3003                               │
 │        ▼                                                         │
 │  ┌──────────────────────┐        ┌──────────────────────────┐  │
-│  │  web  (nginx) :3003   │        │  api  (Bun.serve) :4003   │  │
+│  │  web  (nginx) :3003   │        │  api  (Bun.serve) :4004   │  │
 │  │  ├ React static build │        │  ├ REST API /api/*        │  │
 │  │  └ proxy /api, /events├───────►│  ├ SSE /api/events ──►    │  │
-│  │     to  api:4003      │ docker │  │                        │  │
+│  │     to  api:4004      │ docker │  │                        │  │
 │  └──────────────────────┘  net   │  │  Queue + Worker        │  │
 │                                   │  │   └ spawns yt-dlp+ffmpeg│ │
 │                                   │  │                        │  │
@@ -68,8 +68,8 @@ local network via one `docker compose up`. No database.
 ```
 
 Two services on one compose network. Browser only ever talks to `:3003`; nginx
-proxies `/api` and `/api/events` (SSE) to `api:4003` over the internal docker
-network — so **no CORS** and only one port to remember. `:4003` is published too,
+proxies `/api` and `/api/events` (SSE) to `api:4004` over the internal docker
+network — so **no CORS** and only one port to remember. `:4004` is published too,
 for hitting the API directly while debugging. The api is a single process; its
 queue lives in memory and is mirrored to `state.json` so it survives a restart.
 
@@ -81,7 +81,7 @@ queue lives in memory and is mirrored to `state.json` so it survives a restart.
 
 ```
 server/
-  index.ts        # Bun.serve :4003 — API routes + SSE
+  index.ts        # Bun.serve :4004 — API routes + SSE
   queue.ts        # in-memory queue, concurrency limit, persistence
   downloader.ts   # spawn yt-dlp, parse progress, run post-process
   state.ts        # load/save data/state.json (atomic write)
@@ -153,14 +153,14 @@ web/
 Flow: paste URLs (one per line) → pick MP3/MP4 → **Add to queue**. Table shows
 each job with a live progress bar. Finished rows link to the file. Built with
 `vite build` into static assets; **nginx** serves them on `:3003` and proxies
-`/api` → `api:4003`. All fetch/`EventSource` calls use relative `/api/...` paths,
+`/api` → `api:4004`. All fetch/`EventSource` calls use relative `/api/...` paths,
 so the browser only ever hits `:3003`.
 
 ---
 
 ## 5. API
 
-Served by **api** on `:4003`, reached by the browser through nginx under the
+Served by **api** on `:4004`, reached by the browser through nginx under the
 same origin (`http://<ip>:3003/api/...`).
 
 | Method | Path            | Purpose |
@@ -182,11 +182,11 @@ SSE (not WebSocket) — one-way server→client progress is all that's needed, a
 ```
 project/
 ├── compose.yml
-├── server/              # Bun API  → image, listens :4003
+├── server/              # Bun API  → image, listens :4004
 │   └── Dockerfile
 ├── web/                 # React build + nginx → image, listens :3003
 │   ├── Dockerfile
-│   └── nginx.conf       # static + proxy /api → api:4003
+│   └── nginx.conf       # static + proxy /api → api:4004
 ├── data/                # volume → state.json (queue + history)
 │   └── state.json
 └── downloads/           # volume → finished .mp3 / .mp4
@@ -206,7 +206,7 @@ Two images, one compose file.
 1. `oven/bun` base image.
 2. Install `ffmpeg` + `python3` + `yt-dlp` (pip or static binary).
 3. Copy `server/`, `bun install`.
-4. `EXPOSE 4003`, `CMD ["bun", "server/index.ts"]`.
+4. `EXPOSE 4004`, `CMD ["bun", "server/index.ts"]`.
 
 **`web/Dockerfile`** (multi-stage)
 1. `oven/bun` stage → `vite build` → static `dist/`.
@@ -223,7 +223,7 @@ server {
   root /usr/share/nginx/html;
   location / { try_files $uri /index.html; }        # SPA fallback
   location /api/ {
-    proxy_pass http://api:4003;
+    proxy_pass http://api:4004;
     proxy_http_version 1.1;
     proxy_set_header Connection "";
     proxy_buffering off;                             # required for SSE
@@ -237,13 +237,13 @@ server {
 services:
   api:
     build: ./server
-    expose: ["4003"]          # internal; the line below also publishes it
-    ports: ["4003:4003"]      # optional — direct API access for debugging
+    expose: ["4004"]          # internal; the line below also publishes it
+    ports: ["4004:4004"]      # optional — direct API access for debugging
     volumes:
       - ./data:/data
       - ./downloads:/downloads
     environment:
-      - PORT=4003
+      - PORT=4004
       - CONCURRENCY=2
       - DOWNLOAD_DIR=/downloads
       - STATE_FILE=/data/state.json
@@ -265,9 +265,9 @@ Access from any device on the LAN at **`http://<server-ip>:3003`**.
 1. `server/Dockerfile` with yt-dlp/ffmpeg — confirm `yt-dlp --version` runs.
 2. `downloader.ts` — spawn yt-dlp for one hardcoded URL, parse progress.
 3. `queue.ts` + `state.ts` — enqueue, concurrency, persist/reload.
-4. `index.ts` — API routes + SSE on `:4003`.
+4. `index.ts` — API routes + SSE on `:4004`.
 5. `web/` — input form + live job table; all calls to relative `/api/...`.
-6. `web/Dockerfile` + `nginx.conf` — serve `:3003`, proxy `/api` → `api:4003`.
+6. `web/Dockerfile` + `nginx.conf` — serve `:3003`, proxy `/api` → `api:4004`.
 7. Wire compose (two services + volumes), test on the Ubuntu server at
    `http://<ip>:3003` from another LAN device.
 

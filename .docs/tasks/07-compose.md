@@ -12,8 +12,8 @@ verified download end-to-end over the LAN.
 ## Scope
 
 - `compose.yml`:
-  - `api`: `build: ./server`, `ports: ["4003:4003"]` (optional/debug),
-    volumes `./data:/data` + `./downloads:/downloads`, env (`PORT=4003`,
+  - `api`: `build: ./server`, `ports: ["4004:4004"]` (optional/debug),
+    volumes `./data:/data` + `./downloads:/downloads`, env (`PORT=4004`,
     `CONCURRENCY=2`, `DOWNLOAD_DIR=/downloads`, `STATE_FILE=/data/state.json`),
     `restart: unless-stopped`.
   - `web`: `build: ./web`, `ports: ["3003:3003"]`, `depends_on: [api]`,

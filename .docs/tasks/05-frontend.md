@@ -24,7 +24,7 @@ React + Tailwind UI in `web/`: paste links, pick format, watch jobs live.
 ## Acceptance
 
 - `vite build` produces `dist/`.
-- Against a running api (dev: Vite proxy `/api` → `localhost:4003`): paste 2
+- Against a running api (dev: Vite proxy `/api` → `localhost:4004`): paste 2
   links, submit, both appear and progress bars move live to 100%.
 - Delete button removes a row.
 

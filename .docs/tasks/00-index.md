@@ -18,4 +18,4 @@ with each task file.
 
 **Status values:** `Not Started` → `In Progress` → `Blocked` → `Done`.
 
-Ports: web `:3003` (LAN entry), api `:4003` (internal, proxied by nginx).
+Ports: web `:3003` (LAN entry), api `:4004` (internal, proxied by nginx).

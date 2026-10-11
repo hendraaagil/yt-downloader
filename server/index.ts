@@ -105,7 +105,7 @@ export async function start(port: number, dl: Downloader = download) {
 }
 
 if (import.meta.main) {
-  const { server } = await start(Number(process.env.PORT ?? 4003));
+  const { server } = await start(Number(process.env.PORT ?? 4004));
   const dir = resolve(process.env.DOWNLOAD_DIR ?? "./downloads");
   const ttl = Number(process.env.DOWNLOAD_TTL_HOURS ?? 24) * 3600_000;
   const run = () => sweep(dir, ttl);
