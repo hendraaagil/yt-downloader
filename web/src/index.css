@@ -1,1 +1,31 @@
+/* Hallmark · macrostructure: Workbench · tone: technical-utilitarian · anchor hue: coral-red 25°
+ * genre: atmospheric · theme: custom-tuned dark · tailwind-only (@theme tokens)
+ * pre-emit critique: P5 H4 E4 S4 R5 V4
+ */
 @import "tailwindcss";
+
+@theme {
+  /* surfaces — cool charcoal, atmospheric */
+  --color-paper: oklch(19% 0.015 265);
+  --color-surface: oklch(24% 0.018 265);
+  --color-raise: oklch(29% 0.02 265);
+  --color-line: oklch(38% 0.02 265);
+
+  /* text */
+  --color-ink: oklch(96% 0.01 260);
+  --color-muted: oklch(74% 0.02 260);
+  --color-faint: oklch(58% 0.02 260);
+
+  /* accent — media-warm coral, nods to play without the literal brand red */
+  --color-accent: oklch(68% 0.19 25);
+  --color-accent-hi: oklch(74% 0.19 25);
+
+  /* status */
+  --color-ok: oklch(74% 0.16 150);
+  --color-warn: oklch(78% 0.15 75);
+  --color-bad: oklch(67% 0.2 25);
+
+  /* type — system stacks, zero network dependency for an offline-capable LAN tool */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Menlo, Consolas, monospace;
+}
