@@ -1,0 +1,7 @@
+node_modules/
+web/dist/
+
+# runtime data (keep dirs via .gitkeep)
+data/state.json
+downloads/*
+!downloads/.gitkeep
