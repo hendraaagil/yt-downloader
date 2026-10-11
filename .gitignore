@@ -5,3 +5,4 @@ web/dist/
 data/state.json
 downloads/*
 !downloads/.gitkeep
+.claude/
