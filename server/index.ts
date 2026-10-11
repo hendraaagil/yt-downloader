@@ -63,10 +63,10 @@ export async function start(port: number, dl: Downloader = download) {
         let res;
         try { res = await dl({ url: b.url.trim(), format: b.format }, () => {}); }
         catch (e) { return json({ error: String((e as Error)?.message ?? e) }, 502); }
-        const f = Bun.file(resolve(DIR, res.file.split(/[\\/]/).pop()!));
+        const f = Bun.file(resolve(DIR, res.file));
         if (!(await f.exists())) return json({ error: "file missing after download" }, 500);
         return new Response(f, {
-          headers: { "content-disposition": `attachment; filename*=UTF-8''${encodeURIComponent(res.file.split(/[\\/]/).pop()!)}` },
+          headers: { "content-disposition": `attachment; filename*=UTF-8''${encodeURIComponent(res.file.split("/").pop()!)}` },
         });
       }
 

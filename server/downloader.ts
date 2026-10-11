@@ -1,5 +1,8 @@
+import { readdir } from "node:fs/promises";
+import { relative, resolve } from "node:path";
 import type { Job } from "./types";
 
+const ID = /(?:youtu\.be\/|[?&]v=|shorts\/|embed\/)([A-Za-z0-9_-]{11})/;
 const PCT = /^\[download\]\s+(\d+(?:\.\d+)?)%/;
 
 export type Downloader = (
@@ -9,6 +12,15 @@ export type Downloader = (
 
 export const download: Downloader = async (job, onProgress) => {
   const dir = process.env.DOWNLOAD_DIR ?? "./downloads";
+  const id = ID.exec(job.url)?.[1];
+  if (id) {
+    const ext = "." + job.format;
+    const hit = (await readdir(`${dir}/${id}`).catch(() => [] as string[])).find((f) => f.endsWith(ext));
+    if (hit) {
+      onProgress(100);
+      return { file: `${id}/${hit}`, title: hit.slice(0, -ext.length) };
+    }
+  }
   const fmt =
     job.format === "mp4"
       ? ["-f", "bv*[height<=1080]+ba/b", "--merge-output-format", "mp4"]
@@ -18,7 +30,7 @@ export const download: Downloader = async (job, onProgress) => {
       "yt-dlp", ...fmt, "--newline", "--no-playlist", "--no-quiet", "--no-simulate",
       "--print", "before_dl:TITLE:%(title)s",
       "--print", "after_move:FILE:%(filepath)s",
-      "-o", `${dir}/%(title)s.%(ext)s`,
+      "-o", `${dir}/%(id)s/%(title)s.%(ext)s`,
       "--", job.url, // "--" so a url can never be read as an option
     ],
     { stdout: "pipe", stderr: "pipe" },
@@ -50,7 +62,7 @@ export const download: Downloader = async (job, onProgress) => {
     throw new Error(tail || `yt-dlp exited with code ${code}`);
   }
   if (!file) throw new Error("yt-dlp finished but reported no output file");
-  return { file: file.split(/[\\/]/).pop()!, title };
+  return { file: relative(resolve(dir), resolve(file)).replaceAll("\\", "/"), title };
 };
 
 // standalone: bun downloader.ts <url> [mp3|mp4]

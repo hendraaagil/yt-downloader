@@ -8,6 +8,7 @@ const tmp = await mkdtemp(join(tmpdir(), "api-check-"));
 process.env.DOWNLOAD_DIR = join(tmp, "dl");
 process.env.STATE_FILE = join(tmp, "state.json");
 await Bun.write(join(tmp, "dl", "a.txt"), "hello");
+await Bun.write(join(tmp, "dl", "abcdefghijk", "f.txt"), "cached");
 await writeFile(join(tmp, "secret.txt"), "nope");
 
 const { start } = await import("./index");
@@ -48,6 +49,9 @@ for (const p of ["../secret.txt", "..%2Fsecret.txt", "%2e%2e/secret.txt"]) {
   assert.ok(s === 403 || s === 404, `traversal ${p} -> ${s}`);
 }
 assert.equal((await fetch(`${base}/api/downloads/..%2Fsecret.txt`)).status, 403);
+// task 08: {id}/name sub-path resolves; traversal out of it still 403
+assert.equal(await (await fetch(`${base}/api/downloads/abcdefghijk%2Ff.txt`)).text(), "cached");
+assert.equal((await fetch(`${base}/api/downloads/abcdefghijk%2F..%2F..%2Fsecret.txt`)).status, 403);
 
 assert.equal((await fetch(`${base}/api/jobs/${created[0].id}`, { method: "DELETE" })).status, 204);
 assert.equal(((await (await fetch(`${base}/api/jobs`)).json()) as any[]).length, 1);
