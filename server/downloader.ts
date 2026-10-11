@@ -18,7 +18,7 @@ export const download: Downloader = async (job, onProgress) => {
       "yt-dlp", ...fmt, "--newline", "--no-playlist", "--no-quiet", "--no-simulate",
       "--print", "before_dl:TITLE:%(title)s",
       "--print", "after_move:FILE:%(filepath)s",
-      "-o", `${dir}/%(title)s [%(id)s].%(ext)s`,
+      "-o", `${dir}/%(title)s.%(ext)s`,
       "--", job.url, // "--" so a url can never be read as an option
     ],
     { stdout: "pipe", stderr: "pipe" },
