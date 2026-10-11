@@ -1,8 +1,24 @@
-import { resolve, sep } from "node:path";
+import { readdir, rm, stat } from "node:fs/promises";
+import { join, resolve, sep } from "node:path";
 import { download, type Downloader } from "./downloader";
 import { createQueue } from "./queue";
 
 const json = (b: unknown, status = 200) => Response.json(b, { status });
+
+// Delete top-level entries of dir older than ttlMs (never .gitkeep). Returns count removed.
+// ponytail: top-level mtime only, not a deep walk; deepen if folder mtimes prove unreliable.
+export async function sweep(dir: string, ttlMs: number) {
+  let n = 0;
+  for (const name of await readdir(dir).catch(() => [])) {
+    if (name === ".gitkeep") continue;
+    try {
+      const p = join(dir, name);
+      if (Date.now() - (await stat(p)).mtimeMs > ttlMs) { await rm(p, { recursive: true, force: true }); n++; }
+    } catch (e) { console.error(`cleanup: ${name}: ${(e as Error).message}`); }
+  }
+  console.log(`cleanup: removed ${n} entries`);
+  return n;
+}
 
 export async function start(port: number, dl: Downloader = download) {
   const DIR = resolve(process.env.DOWNLOAD_DIR ?? "./downloads");
@@ -90,5 +106,10 @@ export async function start(port: number, dl: Downloader = download) {
 
 if (import.meta.main) {
   const { server } = await start(Number(process.env.PORT ?? 4003));
+  const dir = resolve(process.env.DOWNLOAD_DIR ?? "./downloads");
+  const ttl = Number(process.env.DOWNLOAD_TTL_HOURS ?? 24) * 3600_000;
+  const run = () => sweep(dir, ttl);
+  await run();
+  setInterval(run, Number(process.env.CLEANUP_INTERVAL_MIN ?? 60) * 60_000).unref();
   console.log(`api listening on :${server.port}`);
 }
