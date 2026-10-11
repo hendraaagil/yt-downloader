@@ -24,7 +24,7 @@ export const download: Downloader = async (job, onProgress) => {
   const fmt =
     job.format === "mp4"
       ? ["-f", "bv*[height<=1080]+ba/b", "--merge-output-format", "mp4"]
-      : ["-x", "--audio-format", "mp3", "--audio-quality", "192K"];
+      : ["-x", "--audio-format", "mp3", "--audio-quality", "192K", "--embed-metadata", "--embed-thumbnail"];
   const proc = Bun.spawn(
     [
       "yt-dlp", ...fmt, "--newline", "--no-playlist", "--no-quiet", "--no-simulate",
