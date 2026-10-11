@@ -212,8 +212,9 @@ Two images, one compose file.
 1. `oven/bun` stage → `vite build` → static `dist/`.
 2. `nginx:alpine` stage → copy `dist/` + `nginx.conf`. `EXPOSE 3003`.
 
-Pin yt-dlp but update it often — YouTube changes break old versions. Either
-rebuild periodically, or run `yt-dlp -U` / `pip install -U yt-dlp` on api start.
+Pin yt-dlp but update it often — YouTube changes break old versions. The api
+entrypoint runs `yt-dlp -U` on start (non-fatal if offline); rebuild with
+`--no-cache` when a release outgrows the baked binary.
 
 **`web/nginx.conf`** (shape)
 ```nginx

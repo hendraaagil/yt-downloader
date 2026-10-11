@@ -7,6 +7,8 @@ RUN apt-get update \
 WORKDIR /app/server
 COPY . .
 RUN bun install
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 ENV PORT=4003 CONCURRENCY=2 DOWNLOAD_DIR=/downloads STATE_FILE=/data/state.json
 EXPOSE 4003
-CMD ["bun", "index.ts"]
+CMD ["/entrypoint.sh"]
