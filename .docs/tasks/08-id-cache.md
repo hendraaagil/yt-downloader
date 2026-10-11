@@ -1,6 +1,6 @@
 # Task 08 — Store downloads by video id + reuse cache
 
-**Status:** Not Started
+**Status:** Done
 **Depends on:** 02, 04
 **Reference:** [`../architecture.md`](../architecture.md) §4.2
 **Owner:** backend-dev

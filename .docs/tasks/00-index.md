@@ -13,8 +13,8 @@ with each task file.
 | 05 | Frontend (React + Tailwind)            | 04         | Done |
 | 06 | Web Dockerfile + nginx proxy           | 05         | Done |
 | 07 | Compose wiring + LAN test              | 06         | Done |
-| 08 | Store downloads by video id + cache    | 02, 04     | Not Started |
-| 09 | Periodic cleanup of downloads/         | 08         | Not Started |
+| 08 | Store downloads by video id + cache    | 02, 04     | Done |
+| 09 | Periodic cleanup of downloads/         | 08         | Done |
 
 **Status values:** `Not Started` → `In Progress` → `Blocked` → `Done`.
 

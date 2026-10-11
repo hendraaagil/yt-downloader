@@ -1,6 +1,6 @@
 # Task 09 — Periodic cleanup of downloads/
 
-**Status:** Not Started
+**Status:** Done
 **Depends on:** 08
 **Reference:** [`../architecture.md`](../architecture.md)
 **Owner:** backend-dev
