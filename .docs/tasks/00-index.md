@@ -18,6 +18,7 @@ with each task file.
 | 10 | Folder refactor + 1 global dl + 12h TTL| 09         | Done |
 | 11 | Bun native routing + named handlers    | 10         | Done |
 | 12 | One file per route handler             | 11         | Done |
+| 13 | yt-dlp cookies + JS runtime (bot gate) | 10         | Done |
 
 **Status values:** `Not Started` → `In Progress` → `Blocked` → `Done`.
 

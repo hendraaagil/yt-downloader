@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "start": "bun src/index.ts",
-    "check": "bun src/queue/queue.ts && bun tests/api-check.ts && bun tests/cleanup-check.ts"
+    "check": "bun src/queue/queue.ts && bun src/download/downloader.ts selftest && bun tests/api-check.ts && bun tests/cleanup-check.ts"
   },
   "devDependencies": {
     "@types/bun": "^1.4.2"

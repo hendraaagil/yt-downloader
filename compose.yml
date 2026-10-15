@@ -6,10 +6,14 @@ services:
     volumes:
       - ./data:/data
       - ./downloads:/downloads
+      - ./cookies:/cookies   # Netscape cookies *.txt here; writable so yt-dlp can refresh them (see cookies/README)
     environment:
       PORT: "4004"
       DOWNLOAD_DIR: /downloads
       STATE_FILE: /data/state.json
+      # optional YouTube cookies (fixes bot gate / 429): rotates across every
+      # *.txt in this dir, round-robin per download. empty dir -> no cookies.
+      COOKIES_DIR: /cookies
       # downloads older than this many hours are deleted by the periodic sweep
       DOWNLOAD_TTL_HOURS: "12"
       # how often (minutes) the sweep runs
