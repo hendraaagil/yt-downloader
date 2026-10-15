@@ -15,6 +15,9 @@ with each task file.
 | 07 | Compose wiring + LAN test              | 06         | Done |
 | 08 | Store downloads by video id + cache    | 02, 04     | Done |
 | 09 | Periodic cleanup of downloads/         | 08         | Done |
+| 10 | Folder refactor + 1 global dl + 12h TTL| 09         | Done |
+| 11 | Bun native routing + named handlers    | 10         | Done |
+| 12 | One file per route handler             | 11         | Done |
 
 **Status values:** `Not Started` → `In Progress` → `Blocked` → `Done`.
 

@@ -1,16 +1,14 @@
-import type { Format, Job } from "./types";
-import type { Downloader } from "./downloader";
+import type { Format, Job } from "../types";
+import type { Downloader } from "../download/downloader";
 import assert from "node:assert/strict";
 import * as state from "./state";
 
 type Opts = {
   download: Downloader;
-  concurrency?: number;
   stateFile?: string;
 };
 
 export async function createQueue(opts: Opts) {
-  const max = opts.concurrency ?? (Number(process.env.CONCURRENCY) || 2);
   const jobs = await state.load(opts.stateFile);
   const subs = new Set<(j: Job) => void>();
   let running = 0;
@@ -28,7 +26,7 @@ export async function createQueue(opts: Opts) {
   };
 
   function pump() {
-    while (running < max) {
+    while (running < 1) {
       const j = jobs.find((x) => x.status === "queued");
       if (!j) return;
       running++;
@@ -82,11 +80,11 @@ async function demo() {
     cur--;
     return { file: "x.mp3" };
   };
-  const q = await createQueue({ download: stub, concurrency: 2, stateFile: file });
+  const q = await createQueue({ download: stub, stateFile: file });
   for (let i = 0; i < 3; i++) q.add(`https://example.com/${i}`, "mp3");
   while (!q.idle()) await Bun.sleep(10);
   await Bun.sleep(30); // let last persist flush
-  assert.equal(peak, 2, "never more than 2 concurrent");
+  assert.equal(peak, 1, "never more than 1 concurrent");
   assert.ok(q.list().every((j) => j.status === "done"), "all done");
   const reloaded = await state.load(file);
   assert.equal(reloaded.length, 3);
@@ -94,7 +92,7 @@ async function demo() {
 
   // restart recovery: a stuck "downloading" job comes back queued and is rerun
   await state.save([{ ...reloaded[0], status: "downloading" }], file);
-  const q2 = await createQueue({ download: stub, concurrency: 2, stateFile: file });
+  const q2 = await createQueue({ download: stub, stateFile: file });
   assert.equal(q2.list()[0].status, "downloading"); // reset to queued, then re-picked
   while (!q2.idle()) await Bun.sleep(10);
   assert.equal(q2.list()[0].status, "done");

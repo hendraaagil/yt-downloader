@@ -11,9 +11,11 @@ await Bun.write(join(tmp, "dl", "a.txt"), "hello");
 await Bun.write(join(tmp, "dl", "abcdefghijk", "f.txt"), "cached");
 await writeFile(join(tmp, "secret.txt"), "nope");
 
-const { start } = await import("./index");
+const { start } = await import("../src/http/server");
+let cur = 0, peak = 0;
 const { server } = await start(0, async (_j, onProgress) => {
-  for (const p of [10, 50, 90]) { onProgress(p); await Bun.sleep(40); }
+  peak = Math.max(peak, ++cur);
+  try { for (const p of [10, 50, 90]) { onProgress(p); await Bun.sleep(40); } } finally { cur--; }
   return { file: "a.txt" };
 });
 const base = `http://localhost:${server.port}`;
@@ -61,6 +63,12 @@ assert.equal((await fetch(`${base}/api/download`, { method: "POST", body: JSON.s
 const dl = await fetch(`${base}/api/download`, { method: "POST", body: JSON.stringify({ url: "https://a", format: "mp3" }) });
 assert.equal(dl.status, 200);
 assert.equal(await dl.text(), "hello");
+
+// global gate: queued job + simultaneous one-shot never overlap
+await post({ urls: ["https://c"], format: "mp3" });
+const shots = await Promise.all([1, 2].map(() => fetch(`${base}/api/download`, { method: "POST", body: JSON.stringify({ url: "https://a", format: "mp3" }) })));
+assert.ok(shots.every((x) => x.status === 200));
+assert.equal(peak, 1, "peak downloader concurrency across both routes");
 
 server.stop(true);
 await Bun.sleep(100);

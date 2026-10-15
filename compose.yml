@@ -8,11 +8,10 @@ services:
       - ./downloads:/downloads
     environment:
       PORT: "4004"
-      CONCURRENCY: "2"
       DOWNLOAD_DIR: /downloads
       STATE_FILE: /data/state.json
       # downloads older than this many hours are deleted by the periodic sweep
-      DOWNLOAD_TTL_HOURS: "24"
+      DOWNLOAD_TTL_HOURS: "12"
       # how often (minutes) the sweep runs
       CLEANUP_INTERVAL_MIN: "60"
     restart: unless-stopped

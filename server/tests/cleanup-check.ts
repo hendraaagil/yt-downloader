@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import { mkdir, mkdtemp, rm, utimes, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { sweep } from "./index";
+import { sweep } from "../src/cleanup/cleanup";
 
 const dir = await mkdtemp(join(tmpdir(), "cleanup-"));
 try {

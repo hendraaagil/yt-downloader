@@ -3,8 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "bun index.ts",
-    "check": "bun queue.ts && bun api-check.ts"
+    "start": "bun src/index.ts",
+    "check": "bun src/queue/queue.ts && bun tests/api-check.ts && bun tests/cleanup-check.ts"
   },
   "devDependencies": {
     "@types/bun": "^1.4.2"

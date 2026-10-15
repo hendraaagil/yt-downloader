@@ -1,6 +1,6 @@
 import { readdir } from "node:fs/promises";
 import { relative, resolve } from "node:path";
-import type { Job } from "./types";
+import type { Job } from "../types";
 
 const ID = /(?:youtu\.be\/|[?&]v=|shorts\/|embed\/)([A-Za-z0-9_-]{11})/;
 const PCT = /^\[download\]\s+(\d+(?:\.\d+)?)%/;
